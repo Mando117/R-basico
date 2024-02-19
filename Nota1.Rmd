@@ -1,0 +1,115 @@
+---
+title: "Nota 1"
+output: html_document
+fig.width: 4  
+fig.height: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+
+### **¿Qué es EDA?**
+
+Análisis Exploratorio de Datos, o Exploratory Data Analysis (EDA), es un proceso que consiste en explorar y comprender los datos. El EDA es fundamental en cualquier análisis de datos, ya que ayuda a comprender la calidad de los datos y a identificar áreas productivas para investigar a profundidad.
+
+En el que:
+
+1. Generamos preguntas sobre los datos.
+2. Buscamos respuestas visualizando, transformando y modelando los datos.
+3. Utilizamos lo que aprendimos para refinar las preguntas y/o generar nuevas preguntas.
+
+
+
+#### **Acerca de las preguntas**
+
+![](img1.png)
+
+### **Tipos de Variables** 
+
+| Tipo de Variable         | Descripción                                       |
+|--------------------------|---------------------------------------------------|
+| Cualitativa Nominal      | Representa categorías sin orden inherente.        |
+| Cualitativa Ordinal      | Representa categorías con un orden específico.    |
+| Cuantitativa Continua    | Representa valores numéricos con infinitos puntos entre ellos. |
+| Cuantitativa Discreta    | Representa valores numéricos con saltos finitos entre ellos. |
+
+
+### **¿Cómo se presenta los datos?**
+
+- **Variable**: Es una cantidad, cualidad o propiedad que se puede medir.
+
+- **Valor**: Es el estado de una variable cuando se mide. El valor de una variable puede cambiar de medición a medición.
+
+- **Observación o Caso**: Es un conjunto de mediciones realizadas bajo condiciones similares (generalmente todas las mediciones en una observación se realizan al mismo tiempo y en el mismo objeto). 
+
+- **Datos Tabulares**: Es un conjunto de valores, cada uno asociado con una variable y una observación. Los datos tabulares están ordenados si cada valor se coloca en su propia "celda", cada variable en su propia columna y cada observación en su propia fila.
+
+![](img2.png)
+
+
+Requisitos: 
+
+```{r}
+library(tidyverse)
+```
+
+### **Descripción tabular** 
+
+```{r}
+head(diamonds)
+```
+
+```{r}
+# Tabla de frecuencias para la variable corte
+
+T_freq <-  diamonds %>%  # Seleccionamos la base de datos 
+  count(cut) %>% # Contamos obs por categoria cut
+  rename(Fi = n) %>% 
+  mutate(Pi = round(Fi/sum(Fi), 2), Po = Pi * 100) # Agregamos las columnas 
+
+T_freq
+```
+
+### Diagrama de barras
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+```
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity)) +
+  labs(title = "Frecuencia de Corte por Claridad",
+       x = "Corte",
+       y = "Frecuencia") +
+  theme_minimal()
+```
+
+```{r}
+head(mtcars)
+```
+
+### Diagrama de puntos
+
+# Porque no utilizar una variable del dataframe diamonds 
+# Son muchas observaciones y todas presentan mucha variabilidad 
+# Rango, Varianza Medidas de dispersión 
+
+
+```{r}
+dotchart((mtcars$hp),
+         main = "Potencia (HP) de los Automóviles",
+         xlab = "Potencia (HP)", pch = 19, col = "blue")
+```
+
+### Diagrama de tallo y hojas
+
+```{r}
+# Crear un diagrama de hojas de la variable 'hp' del conjunto de datos mtcars
+stem(mtcars$hp, scale = 2)
+```
+
