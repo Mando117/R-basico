@@ -1,0 +1,179 @@
+---
+title: "NOTA 2"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+Primero, se cargan estas bibliotecas. Luego, se lee un archivo CSV llamado "MW.csv" y se almacena en un DataFrame denominado df. Finalmente, se muestra una vista previa de los primeros registros del DataFrame mediante head(df).
+
+```{r}
+# Cargar la biblioteca tidyverse
+library(tidyverse)
+library(gridExtra)
+
+# Cargar los datos desde un archivo CSV
+df <- read.csv("MW.csv")
+
+# Explorar los primeros registros del DataFrame
+head(df)
+
+```
+
+Realizamos un resumen estadístico de los datos contenidos en el DataFrame df utilizando la función summary(df). Luego, los datos se filtran para eliminar valores atípicos y se separan en dos DataFrames diferentes, df_male y df_female, según la categoría "Sex". Esto se logra utilizando la función filter() para seleccionar rangos válidos de "Height" (altura) y "Weight" (peso) en el DataFrame original df, lo que permite mantener únicamente los datos dentro de rangos específicos.
+
+```{r}
+# Resumen estadístico
+summary(df)
+
+# Vamos a separar los datos por la categoria Sex y quitaremos los outliers
+df <- filter(df, (135 < Height & Height< 220) & (40 < Weight & Weight < 130))
+
+df_male <- filter(df, Sex == "Male")
+
+df_female <-filter(df, Sex == "Female")
+```
+
+Generamos un gráfico de caja (boxplot) personalizado que muestra la distribución de la altura (Height) separada por género (Sex). Se utiliza geom_boxplot() para crear el diagrama de caja básico y stat_summary() para agregar estadísticas adicionales, como la media y los cuantiles. Los puntos representan estas estadísticas.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+# Crear un gráfico de caja personalizado con estadísticas adicionales
+ggplot(df, aes(x = Sex, y = Height, fill = Sex)) +
+  geom_boxplot() +
+  stat_summary(
+    fun = c(mean, quantile), 
+    fun.min = min, 
+    fun.max = max, 
+    geom = "point", 
+    position = position_dodge(width = 0.75), 
+    size = 3
+  ) +
+  labs(
+    title = "Diagrama de Caja de Altura con Estadísticas",
+    x = "Sexo",
+    y = "Altura (cm)"
+  ) +
+  theme_minimal()
+```
+
+Creamos dos gráficos de histograma, uno para la distribución de altura en hombres (df_male) y otro para mujeres (df_female). Cada gráfico muestra la frecuencia de alturas en intervalos de 5 centímetros (binwidth = 5) y marca la media de altura con una línea vertical punteada en azul.
+
+```{r, fig.align = 'center', fig.width = 7, fig.height = 3}
+p1 <- ggplot(data = df_male, mapping = aes(x = Height)) +
+        geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+        geom_vline(aes(xintercept = mean(Height)),
+                     color = "blue", linetype = "dashed", size = 1) +
+        labs(
+        title = "Distribución de Altura en Hombres",
+        x = "Altura (cm)",
+        y = "Frecuencia") +
+        theme_minimal()
+
+p2 <- ggplot(data = df_female, mapping = aes(x = Height)) +
+      geom_histogram(binwidth = 5, fill = "lightblue", color = "black") +
+      geom_vline(aes(xintercept = mean(Height)),
+                     color = "blue", linetype = "dashed", size = 1) +
+      labs(
+      title = "Distribución de Altura en Mujeres",
+      x = "Altura (cm)",
+      y = "Frecuencia") +
+      theme_minimal()
+
+grid.arrange(p1,p2,ncol = 2)
+```
+
+Generamos dos gráficos de histograma, uno para la distribución de peso en hombres (df_male) y otro para mujeres (df_female). Cada gráfico muestra la frecuencia de pesos en intervalos de 5 kg (binwidth = 5) y marca la media del peso con una línea vertical punteada en azul.
+
+```{r, fig.align = 'center', fig.width = 7, fig.height = 3}
+p1 <- ggplot(data = df_male, mapping = aes(x = Weight)) +
+        geom_histogram(binwidth = 5, fill = "lightgreen", color = "black") +
+        geom_vline(aes(xintercept = mean(Weight)),
+                     color = "blue", linetype = "dashed", size = 1) +
+        labs(
+        title = "Distribución del Peso en Hombres",
+        x = "Peso (kg)",
+        y = "Frecuencia") +
+        theme_minimal()
+
+p2 <- ggplot(data = df_female, mapping = aes(x = Weight)) +
+      geom_histogram(binwidth = 5, fill = "lightblue", color = "black") +
+      geom_vline(aes(xintercept = mean(Weight)),
+                     color = "blue", linetype = "dashed", size = 1) +
+      labs(
+      title = "Distribución del Peso en Mujeres",
+      x = "Peso (kg)",
+      y = "Frecuencia") +
+      theme_minimal()
+grid.arrange(p1,p2,ncol = 2)
+```
+
+Creamos un gráfico de dispersión para visualizar la relación entre la altura (en cm) y el peso (en kg) de los datos en el DataFrame df. Además, aplica una línea de regresión lineal a los puntos para ilustrar la tendencia general de la relación.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+# Crear un gráfico de dispersión
+ggplot(df) +
+  geom_point(aes(x = Height, y = Weight, color = Sex)) +  # Agregar puntos
+  geom_smooth(aes(x = Height, y = Weight), method = lm) +
+  labs(
+    title = "Correlación entre Altura y Peso por Sexo",
+    x = "Altura (cm)",
+    y = "Peso (kg)"
+  ) +
+  theme_minimal()
+
+```
+
+Calculamos la media (media_hombres) y la desviación estándar (sd_hombres) de las alturas de los hombres en el DataFrame df_male utilizando las funciones mean() y sd().
+
+Luego, se crea un histograma de las alturas de los hombres utilizando ggplot2. Se establece el histograma para mostrar la densidad en el eje y con aes(y = ..density..) y se personaliza su apariencia con colores y líneas. Además, se agrega una curva de distribución normal ajustada a las observaciones utilizando geom_density() con parámetros basados en la media y la desviación estándar calculadas anteriormente.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+
+
+
+```
+
+En este código, se realiza un análisis de chi-cuadrado para comparar las frecuencias observadas y esperadas en intervalos de clase definidos por canastas. Los comentarios explican cada paso, desde el cálculo de frecuencias observadas y probabilidades esperadas hasta la realización de la prueba de chi-cuadrado. Esto facilita la comprensión de la aplicación de la prueba estadística a los datos de altura de los hombres.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+# Obtener las alturas de los hombres
+datos <- df_male$Height
+
+# Definir los intervalos de clase (canastas) para el histograma
+canastas <- seq(min(datos), max(datos), 5)
+
+# Inicializar un vector para almacenar las frecuencias observadas
+freq_obs <- c()
+
+# Calcular las frecuencias observadas para cada intervalo de clase
+for (ii in 1:(length(canastas)-1)) {
+  obs <- ifelse(datos > canastas[ii] & datos < canastas[ii + 1], 1, 0)
+  freq_obs[ii] <- sum(obs)
+}
+
+# Calcular las probabilidades esperadas para cada intervalo de clase
+p_esp <- diff(sapply(canastas, function(x) {
+  pnorm(x, mean = media_hombres, sd = sd_hombres)
+}))
+
+# Ajustar la primera y última probabilidad esperada para incluir valores fuera de los intervalos
+p_esp[1] <- p_esp[1] + pnorm(canastas[1], mean = media_hombres, sd = sd_hombres)
+p_esp[length(p_esp)] <- p_esp[length(p_esp)] + (1 - sum(p_esp))
+
+# Calcular las frecuencias esperadas para cada intervalo de clase
+freq_esp <- p_esp * sum(freq_obs)
+
+# Crear una tabla con las frecuencias observadas y esperadas
+tibble(freq_obs, freq_esp)
+
+# Realizar una prueba de chi-cuadrado para comparar las frecuencias observadas y esperadas
+chisq.test(freq_obs, p = p_esp)
+
+
+chisq.test(freq_obs, p = freq_esp/sum(freq_esp))
+
+
+```
+00

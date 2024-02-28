@@ -1,0 +1,161 @@
+---
+title: "NOTA 1"
+output: pdf_document
+---
+
+```{r setup,  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r, echo = FALSE}
+library(ggplot2)
+```
+
+# ¿Qué es ggplt2?
+
+Ggplot es una librería de R utilizada para crear gráficos estadísticos de alta calidad de manera fácil y flexible. Fue desarrollada por Hadley Wickham y se basa en la gramática de los gráficos, lo que significa que proporciona una forma coherente y estructurada de crear visualizaciones de datos mediante la combinación de capas y elementos gráficos.
+
+# ¿Cómo funciona?
+
+![CAPAS EN ggplot](p1.png){width=300px height=300px}
+
+# Instalación
+
+```{r, eval = FALSE, echo = TRUE}
+# La manera fácil de instalar ggplt es intalando todo el paquete tydiverse:
+install.packages("tidyverse")
+
+# Instalar solamente ggplot2:
+install.packages("ggplot2")
+```
+
+
+# ¿Cómo utilizarlo? 
+
+En esta capa declaramos los datos con los que trabajaremos.Los datos se proporcionan como un data frame en R, y cada columna del data frame suele corresponder a una variable que quieres representar en el gráfico.
+
+```{r, fig.align = 'center', fig.width = 3, fig.height = 3}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy))
+
+```
+En este caso nos muestra un plot vacio. 
+
+La geometría define el tipo de gráfico que deseas crear, como un gráfico de dispersión (geom_point), un gráfico de barras (geom_bar), un gráfico de líneas (geom_line), etc. Cada geometría tiene sus propias características visuales y requerimientos de datos.
+
+```{r, fig.align = 'center', fig.width = 3, fig.height = 3}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy))+ # El signo de mas
+  geom_point() # Aquí agregamos la geometría 
+```
+
+Las estéticas se refieren a cómo mapeas las variables en tus datos a las propiedades visuales del gráfico, como el color, la forma, el tamaño y la posición. Por ejemplo, puedes mapear una variable a los colores de los puntos en un gráfico de dispersión utilizando la estética color, o mapear una variable a la posición en el eje x utilizando la estética x.
+ 
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = class)) + 
+  geom_point()
+```
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy))+ 
+  geom_point(mapping = aes(color = class))+
+  geom_smooth()
+
+```
+\newpage
+
+El faceting te permite dividir tus datos en subgráficos o paneles basados en una o más variables categóricas. Esto es útil para explorar patrones en los datos en diferentes grupos o categorías.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+ggplot(data = mpg) +
+ geom_point(mapping = aes(x = displ, y = hwy, color = class)) +
+ facet_grid(drv ~ .)
+```
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class)) +
+  facet_wrap(~ class, nrow = 2)
+```
+
+\newpage
+
+Transformación Estadística esta capa te permite aplicar transformaciones estadísticas a tus datos antes de representarlos en el gráfico. Por ejemplo, puedes calcular estadísticas resumen como la media o la mediana de tus datos y luego representarlas en el gráfico.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+
+ggplot(data = diamonds) +
+  stat_summary(
+    mapping = aes(x = cut, y = depth),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median,)+
+  theme_minimal()
+
+```
+
+\newpage 
+
+## Histogramas 
+
+En esta parte, se establece una semilla aleatoria para garantizar la reproducibilidad de los resultados. Luego, se crea un data frame llamado 'df' que contiene dos variables: 'sex' para el género (Mujer o Hombre) y 'weight' para el peso. Se generan 200 valores de peso para cada género de manera aleatoria a partir de distribuciones normales con diferentes medias.
+
+```{r}
+# Establece una semilla aleatoria para reproducibilidad
+set.seed(1234)
+
+# Crea un data frame llamado 'df' con dos columnas: 'sex' y 'weight'
+# La columna 'sex' contiene factores "M" (Mujeres) y "H" (Hombres)
+# La columna 'weight' contiene valores de peso generados aleatoriamente
+df <- data.frame(
+  sex = factor(rep(c("M", "H"), each = 200)),
+  weight = round(c(rnorm(200, mean = 55, sd = 5), rnorm(200, mean = 65, sd = 5)))
+)
+
+# Muestra las primeras filas del data frame 'df'
+head(df)
+
+```
+
+\newpage
+
+A continuación, se realizan visualizaciones utilizando ggplot2:
+
+En esta parte, se crea un histograma de los valores de peso 'weight' con una superposición de una densidad suavizada.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+# Histograma normal
+p <- ggplot(df, aes(x = weight)) +
+  geom_histogram(aes(y = ..density..), colour = "black", fill = "white") +
+  geom_density(alpha = 0.2, fill = "#FF6666")
+p # Notar que esta vez estamos guardando el plot en una variable 
+```
+ Luego, se agrega una línea vertical punteada de color azul en la media del peso.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+# Línea vertical en la media del peso
+p2 <- p + geom_vline(aes(xintercept = mean(weight)),
+                     color = "blue", linetype = "dashed", size = 1)
+p2
+
+```
+
+\newpage
+
+En esta sección, se crea un histograma y una densidad para los valores de peso agrupados por género (Mujeres y Hombres) y coloreados por género.
+
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+p2 <- ggplot(df, aes(x = weight, fill = sex, color = sex)) +
+  geom_histogram(alpha = 0.6, position = "identity") +
+  geom_density(alpha = 0.2)
+p2
+```
+
+En esta última parte, se crea un histograma de densidades suavizadas para los valores de peso agrupados por género y coloreados por género. La densidad suavizada se calcula para cada grupo.
+```{r, fig.align = 'center', fig.width = 5, fig.height = 3}
+p3 <- ggplot(df, aes(x = weight, fill = sex, color = sex)) +
+  geom_histogram(aes(y = ..density..), position = "identity", alpha = 0.5) +
+  geom_density(alpha = 0.2)
+p3
+```
+
+
+
+

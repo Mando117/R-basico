@@ -1,0 +1,92 @@
+library(tidyverse)
+glimpse(Metro_V_1_2)
+
+
+---
+title: "Análisis de datos del metro de la CDMX"
+output: html_document
+---
+
+## Análisis de datos del metro de la CDMX con `tidyverse`
+
+Vamos a utilizar la base de datos del metro de la CDMX para practicar algunas operaciones comunes de análisis de datos con `tidyverse`.
+
+
+```{r}
+getwd()
+```
+
+
+```{r analysis, echo=TRUE}
+library(tidyverse)
+library(readxl)
+base_metro <- read_excel("Metro V.1.2.xlsx")
+
+
+```
+
+# Exploración inicial
+```{r}
+glimpse(base_metro)
+```
+
+
+# 1. Filtrado de datos
+filter() permite seleccionar subconjuntos de filas dentro del data frame. 
+En este caso, estamos filtrando las estaciones en el mes de enero del año 2022 con una afluencia mayor a 1000.
+```{r}
+filtered_stations <- filter(base_metro, mes == "Enero", anio == "2022", afluencia > 1000)
+head(filtered_stations)
+hist(filtered_stations$afluencia)
+
+```
+
+# 2. Selección de columnas
+```{r}
+selected_columns <- select(base_metro, mes, anio, estacion, afluencia)
+head(selected_columns)
+```
+
+# 3. Ordenamiento de datos
+```{r}
+ordered_data <- arrange(base_metro, desc(afluencia))
+head(ordered_data)
+```
+
+# 4. Creación y modificación de columnas
+```{r}
+modified_data <- mutate(base_metro, afluencia_miles = afluencia / 1000)
+head(modified_data)
+```
+
+# 5. Resumen y agrupación de datos
+```{r}
+monthly_summary_2023 <- base_metro %>%
+  filter(anio == "2022") %>%
+  group_by(mes) %>%
+  summarise(afluencia_total = sum(afluencia), afluencia_promedio = mean(afluencia))
+head(monthly_summary_2023)
+```
+
+# 6. Uso de pipelines
+```{r}
+top_stations_2022 <- base_metro |>
+  filter(anio == "2022") |>
+  group_by(estacion) |>
+  summarise(afluencia_promedio = mean(afluencia)) |>
+  arrange(desc(afluencia_promedio)) |>
+  head(5)
+top_stations_2022
+```
+
+# 7. Agrupaciones más avanzadas
+```{r}
+grouped_data <- base_metro |>
+  group_by(linea, mes) |>
+  mutate(afluencia_desv = sd(afluencia))
+head(grouped_data)
+```
+
+
+
+
